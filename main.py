@@ -7,9 +7,26 @@ import shutil
 from io import StringIO
 
 # https://www.federalreserve.gov/releases/z1/dataviz/dfa/distribute/chart/#range:1989.3,2023.2;quarter:135;series:Net%20worth;demographic:networth;population:all;units:levels
+# The fed derives quarterly results by interpolating the consumer report data done every 3ish years
+
 # https://dqydj.com/net-worth-percentiles/
 # https://dqydj.com/millionaires-in-america/
 # https://www.kaggle.com/datasets/prasertk/forbes-worlds-billionaires-list-2022
+
+# Household wealth data
+# https://simba.isr.umich.edu/DC/s.aspx
+# WEALTH W/ 
+# found from https://arxiv.org/pdf/1209.4787.pdf
+# section 6.1
+
+
+# Pareto:
+# Simple Models of Pareto Income and Wealth Inequality
+# https://assets.aeaweb.org/asset-server/articles-attachments/jep/app/2901/29010029_app.pdf 
+# Pareto Models for Top Incomes
+# https://hal.science/hal-02145024v1/file/TopIncomes.pdf
+# The Kinetics of Wealth and the Origin of the Pareto Law
+# https://arxiv.org/pdf/1212.6300.pdf
 if os.path.exists('/out'):
 	shutil.rmtree('out')
  
@@ -31,41 +48,12 @@ sns.set_palette(sns.dark_palette("#69d"))
 
 plt_cnt = 0
 
-# Load the provided CSV data
-df = pd.read_csv("dfa-networth-levels.csv")
-
-# Display the first few rows of the dataset for exploration
-df.head()
-
-# Adjust the date format and convert to datetime
-df['Date'] = df['Date'].str.replace(':', '-').astype('period[Q]')
-
-# Pivot the dataframe
-df_net_worth = df.pivot(index='Date', columns='Category', values='Net worth')
-print(df_net_worth.head())
-
-# Reverse the columns
-# df_net_worth = df_net_worth[df_net_worth.columns[::-1]]
-
-
-# Inspect the transformed dataframe
-print(df_net_worth.head())
-
-# Define population sizes for each category
-population_sizes = {
-	'TopPt1': 0.001,
-	'RemainingTop1': 0.009,
-	'Next9': 0.09,
-	'Next40': 0.4,
-	'Bottom50': 0.5
-}
-
 # # Normalize the net worth data by population size for each category
 # for category, size in population_sizes.items():
 #     df_net_worth[category] *= size
 
 # Calculate total wealth for each time period (sum across all categories)
-df_net_worth['Total Net Worth'] = df_net_worth.sum(axis=1)
+# df_net_worth['Total Net Worth'] = df_net_worth.sum(axis=1)
 
 # Inspect the transformed dataframe
 # print(df_net_worth.head())
@@ -75,10 +63,23 @@ df_net_worth['Total Net Worth'] = df_net_worth.sum(axis=1)
 #=============================================
 
 # Plotting the data
+
+# Make a copy to change the labels
+df_net_worth_copy = df_net_worth.copy()
+
+df_net_worth_copy.columns = percentiles_str.values()
+
 plt.figure(figsize=(14,8))
-df_net_worth.drop(columns=['Total Net Worth']).plot.area(ax=plt.gca())
-plt.title('Distribution of Net Worth Over Time')
-plt.ylabel('Net Worth')
+df_net_worth_copy.plot.area(ax=plt.gca())
+ax=plt.gca()
+ax.legend(title="Population Percentiles")
+plt.title('Distribution of Net Worth 1989-2023')
+plt.ylabel('Net Worth (Trillions)')
+
+# Adjust the y-axis to be in trillions
+locs, labels = plt.yticks()  # Get current y-axis tick locations and labels
+plt.yticks(locs, [f"{x*1e-12:.1f}T" for x in locs])  # Set new labels in trillions
+
 plt.xlabel('Date')
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
@@ -96,32 +97,28 @@ sns.set_palette(sns.dark_palette("#69d", reverse=True))
 data_2020Q1 = df_net_worth.loc['2020Q1']
 print(data_2020Q1)
 
-# Define the population percentiles for each category
-percentiles = {
-    'TopPt1': (99.99, 100),
-    'RemainingTop1': (99, 99.99),
-    'Next9': (90, 99),
-    'Next40': (50, 90),
-    'Bottom50': (0, 50)
-}
-
 # Extracting the data for 2020Q1 excluding 'Total Net Worth'
-data_2020Q1 = data_2020Q1.drop('Total Net Worth')
+# data_2020Q1 = data_2020Q1.drop('Total Net Worth')
 
 #-----------------------------------------------
 # Plotting wealth based on percentiles (bar graphs)
 #-----------------------------------------------
 
 # Plotting the data
-plt.figure(figsize=(12, 8))
+plt.figure(figsize=(14, 8))
 for category, (start, end) in percentiles.items():
     plt.bar(f"{start}-{end}", data_2020Q1[category], label=category)
 
 plt.title('Net Worth Distribution in 2020Q1 by Population Percentile')
-plt.ylabel('Net Worth')
+
+# Adjust the y-axis to be in trillions
+locs, labels = plt.yticks()  # Get current y-axis tick locations and labels
+plt.yticks(locs, [f"{x*1e-12:.1f}T" for x in locs])  # Set new labels in trillions
+
+plt.ylabel('Net Worth (Trillions)')
 plt.xlabel('Population Percentile')
 plt.xticks(rotation=45)
-plt.legend(loc="upper left", bbox_to_anchor=(1,1))
+# plt.legend(loc="upper left", bbox_to_anchor=(1,1))
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 plt.savefig(f'out/{plt_cnt}_net_worth_dist_bar.png')
@@ -140,37 +137,48 @@ people_in_category = {category: total_population * size for category, size in po
 # Normalize the wealth by number of people in each category
 normalized_wealth = data_2020Q1 / pd.Series(people_in_category)
 
+print(normalized_wealth.head())
+
 # Plotting the bar and line graph
 plt.figure(figsize=(14, 8))
 for category, (start, end) in percentiles.items():
     plt.bar(f"{start}-{end}", normalized_wealth[category], label=category)
-normalized_wealth.plot(color='red')
+# normalized_wealth.plot(color='red')
 plt.title('Per-capita Wealth Distribution in 2020Q1 by Population Percentile')
-plt.ylabel('Net Wealth per Person (Millions)')
+plt.ylabel('Net Wealth per Capita (Millions)')
+
+# Adjust the y-axis to be in millions
+locs, labels = plt.yticks()  # Get current y-axis tick locations and labels
+plt.yticks(locs, [f"{x*1e-6:.1f}M" for x in locs])  # Set new labels in millions
+
 plt.xlabel('Population Percentile')
 plt.xticks(rotation=45)
 # plt.gca().invert_xaxis()
 plt.legend(loc="upper left", bbox_to_anchor=(1,1))
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
-plt.savefig(f'out/{plt_cnt}_wealth_normalized_bar_and_line.png')
+plt.savefig(f'out/{plt_cnt}_per_capita_wealth_bar.png')
 plt_cnt += 1
 
 #-----------------------------------------------
 # Plotting wealth based on normalized percentiles (just line graph)
 #-----------------------------------------------
-
+print(percentiles.values(), normalized_wealth.values)
 plt.figure(figsize=(14, 8))
-normalized_wealth.plot(color='red')
-plt.title('Normalized Wealth Distribution in 2020Q1 by Population Percentile (Line Graph)')
+plt.plot(percentiles_str_list, normalized_wealth.values[::-1], color='red')
+plt.title('Per-capita Wealth Distribution in 2020Q1 by Population Percentile')
 plt.ylabel('Net Wealth per Person (Millions)')
+
+# Adjust the y-axis to be in millions
+locs, labels = plt.yticks()  # Get current y-axis tick locations and labels
+plt.yticks(locs, [f"{x*1e-6:.1f}M" for x in locs])  # Set new labels in millions
+
 plt.xlabel('Population Percentile')
 plt.xticks(rotation=45)
-plt.gca().invert_xaxis()
 # plt.legend(loc="upper left", bbox_to_anchor=(1,1))
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
-plt.savefig(f'out/{plt_cnt}_wealth_normalized_line.png')
+plt.savefig(f'out/{plt_cnt}_per_capita_wealth_line.png')
 plt_cnt += 1
 #-----------------------------------------------
 # Interpolate
@@ -219,10 +227,14 @@ x_space = np.linspace(0, 100, 500)
 print(normalized_wealth.values[::-1])
 y_interp = np.interp(x_space, [size*100 for _, size in population_sizes.items()], normalized_wealth.values[::-1])
 plt.plot(x_space, y_interp, color='red')
-plt.title('Scaled Normalized Wealth Distribution in 2020Q1 by Population Percentile')
+plt.title('Scaled Per-capita Wealth Distribution in 2020Q1 by Population Percentile')
 plt.ylabel('Net Wealth per Person (Millions)')
+
+# Adjust the y-axis to be in millions
+locs, labels = plt.yticks()  # Get current y-axis tick locations and labels
+plt.yticks(locs, [f"{x*1e-6:.1f}M" for x in locs])  # Set new labels in millions
+
 plt.xlabel('Population Percentile')
-# plt.yscale('log')  # This sets the y-axis to a logarithmic scale
 plt.xticks(rotation=45)
 # plt.gca().invert_xaxis()
 # plt.legend(loc="upper left", bbox_to_anchor=(1,1))
@@ -257,28 +269,68 @@ plt.savefig(f'out/{plt_cnt}_log-log-scaled_wealth_normalized_line.png')
 plt_cnt += 1
 
 #-----------------------------------------------
-# Scaled wealth line graph
+# Polynomial interpolated Scaled per-capita wealth line graph
 #-----------------------------------------------
-plt.figure(figsize=(14, 8))
-
 x_space = np.linspace(0, 100, 500)
-print(data_2020Q1.values[::-1])
-y_interp = np.interp(x_space, [size*100 for _, size in population_sizes.items()], data_2020Q1.values[::-1])
-plt.plot(x_space, y_interp, color='red')
-plt.title('log-log Scaled Normalized Wealth Distribution in 2020Q1 by Population Percentile')
+y_interp = np.interp(x_space, [size*100 for _, size in population_sizes.items()], normalized_wealth.values[::-1])
+
+# Polynomial interpolation
+degrees = np.arange(1, 10)  # This sets the max degree to 9, you can change this value.
+best_degree = 0
+min_residual = float('inf')
+
+for deg in degrees:
+    p = np.polyfit(x_space, y_interp, deg)
+    y_poly = np.polyval(p, x_space)
+    residual = np.sum((y_interp - y_poly)**2)
+    if residual < min_residual:
+        min_residual = residual
+        best_degree = deg
+
+p_best = np.polyfit(x_space, y_interp, best_degree)
+y_best_poly = np.polyval(p_best, x_space)
+
+# Plotting
+plt.figure(figsize=(14, 8))
+plt.plot(x_space, y_interp, color='red', label='Data')
+plt.plot(x_space, y_best_poly, color='blue', linestyle='--', label=f'Polynomial (Degree {best_degree})')
+
+plt.title('Scaled Per-capita Wealth Distribution in 2020Q1 by Population Percentile')
 plt.ylabel('Net Wealth per Person (Millions)')
+locs, labels = plt.yticks()
+plt.yticks(locs, [f"{x*1e-6:.1f}M" for x in locs])
 plt.xlabel('Population Percentile')
-# plt.yscale('log')  # This sets the y-axis to a logarithmic scale
-# plt.xscale('log')
-ax = plt.gca()
-# ax.set_ylim(0, 35)
 plt.xticks(rotation=45)
-# plt.gca().invert_xaxis()
-# plt.legend(loc="upper left", bbox_to_anchor=(1,1))
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
-plt.savefig(f'out/{plt_cnt}_scaled_wealth_line.png')
+plt.legend()
+plt.savefig(f'out/{plt_cnt}_per_capita_wealth_polynomial_fit_line.png')
 plt_cnt += 1
+
+
+# #-----------------------------------------------
+# # Scaled wealth line graph
+# #-----------------------------------------------
+# plt.figure(figsize=(14, 8))
+
+# x_space = np.linspace(0, 100, 500)
+# print(data_2020Q1.values[::-1])
+# y_interp = np.interp(x_space, [size*100 for _, size in population_sizes.items()], data_2020Q1.values[::-1])
+# plt.plot(x_space, y_interp, color='red')
+# plt.title('log-log Scaled Normalized Wealth Distribution in 2020Q1 by Population Percentile')
+# plt.ylabel('Net Wealth per Person (Millions)')
+# plt.xlabel('Population Percentile')
+# # plt.yscale('log')  # This sets the y-axis to a logarithmic scale
+# # plt.xscale('log')
+# ax = plt.gca()
+# # ax.set_ylim(0, 35)
+# plt.xticks(rotation=45)
+# # plt.gca().invert_xaxis()
+# # plt.legend(loc="upper left", bbox_to_anchor=(1,1))
+# plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
+# plt.tight_layout()
+# plt.savefig(f'out/{plt_cnt}_scaled_wealth_line.png')
+# plt_cnt += 1
 
 
 #=============================================
@@ -426,6 +478,11 @@ plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 plt.savefig(f'out/{plt_cnt}_log-log_scaled_household_wealth_2020_and_2023_line.png')
 plt_cnt += 1
+
+#=============================================
+# More granularity (new dataset)
+#=============================================
+
 
 #-----------------------------------------------
 # Fitting pareto distribution
