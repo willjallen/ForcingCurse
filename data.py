@@ -27,31 +27,32 @@ class FedData():
 	'''  
    # Define population sizes for each category
 	POPULATION_SIZES = {
-		'TopPt1': 0.001,
-		'RemainingTop1': 0.009,
-		'Next9': 0.09,
+		'Bottom50': 0.5,
 		'Next40': 0.4,
-		'Bottom50': 0.5
+		'Next9': 0.09,
+		'RemainingTop1': 0.009,
+		'TopPt1': 0.001
 	}
 
 	# Define the population percentiles for each category
 	PERCENTILES = {
-		'TopPt1': (99.99, 100),
-		'RemainingTop1': (99, 99.99),
-		'Next9': (90, 99),
+		'Bottom50': (0, 50),
 		'Next40': (50, 90),
-		'Bottom50': (0, 50)
+		'Next9': (90, 99),
+		'RemainingTop1': (99, 99.99),
+		'TopPt1': (99.99, 100)
 	}
 
 	PERCENTILES_STR = {
-		'TopPt1': '99.99-100',
-		'RemainingTop1': '99-99.99',
-		'Next9': '90-99',
+		'Bottom50': '0-50',
 		'Next40': '50-90',
-		'Bottom50': '0-50'
+		'Next9': '90-99',
+		'RemainingTop1': '99-99.99',
+		'TopPt1': '99.99-100'
 	}
 
-	PERCENTILES_STR_LIST = ['99.99-100', '99-99.99', '90-99', '50-90', '0-50'] 
+	PERCENTILES_STR_LIST = ['0-50', '50-90', '90-99', '99-99.99', '99.99-100']
+
  
 	def __init__(self):
 		self.loaded = False
@@ -64,6 +65,12 @@ class FedData():
 
 		# Pivot the dataframe
 		self.df_net_worth = self.df.pivot(index='Date', columns='Category', values='Net worth')
+  
+		# Reverse the order of the columns
+		# new_order = ['TopPt1', 'RemainingTop1', 'Next9', 'Next40', 'Bottom50']
+		# self.df_net_worth = self.df_net_worth.reindex(columns=new_order)
+ 
+		# Renormalize units to single dollars
 		self.df_net_worth *= 1_000_000 
 
 		self.loaded = True
@@ -71,8 +78,7 @@ class FedData():
 	
 	def get_net_worth_data(self):
 		if not self.loaded:
-			print("Load the data first with .load()")
-			return 
+			raise Exception("Data not loaded. Call the 'load' method first.") 
 		return self.df_net_worth.copy()
 
 
@@ -80,8 +86,26 @@ class PSIDData():
 	def __init__(self):
 		self.loaded = False
   
-	def load(self):
+	def load(self, cpi_adjust: bool, target_year=2022):
 		print("Loading PSID household wealth data...")
+  
+  
+		if cpi_adjust:
+			oecd_data = OECDData()
+			oecd_data.load()
+			cpi_data = oecd_data.get_cpi_data()
+   
+			# Find the CPI value for the target year
+			cpi_target_year = cpi_data[cpi_data['TIME'] == target_year]['Value'].iloc[0]
+   
+			# Calculate multipliers and convert year to string in the dictionary
+			self.cpi_multiplier_dict = {
+				str(year): cpi_target_year / cpi_value
+				for year, cpi_value in zip(cpi_data['TIME'], cpi_data['Value'])
+			}
+   
+ 
+ 
 
 		# Load the data labels
 		with open("data/PSID/data_labels.txt", 'r') as file:
@@ -115,18 +139,23 @@ class PSIDData():
 				year_df.set_index(index_column, inplace=True)
 				year_df.index.name = 'FAMILY ID'
 				year_df.columns = ['IMP WEALTH W/ EQUITY', 'ACC WEALTH W/ EQUITY']
-    
+	
 				# Remove empty rows (NaN)
 				year_df = year_df.dropna(axis=0, how='any')	
-    
-				# TODO: Adjust for inflation
-    
+	
+				# Adjust for inflation if cpi_adjust is True
+				if cpi_adjust:
+					multiplier = self.cpi_multiplier_dict[year]
+					year_df['IMP WEALTH W/ EQUITY'] *= multiplier
+	
 				self.household_wealth_year_dfs[year] = year_df
 
 		self.loaded = True
 		print("PSID household wealth data loaded")
   
 	def get_household_wealth_data(self):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.") 
 		return copy.deepcopy(self.household_wealth_year_dfs)
 
 		# sample_year = next(iter(self.household_wealth_year_dfs))  # Get a sample year
@@ -157,10 +186,38 @@ class PSIDData():
 		return None
 
 
-fed_data = FedData()
-fed_data.load()
-print(fed_data.get_net_worth_data())
+class OECDData():
+	def __init__(self):
+		self.loaded = False
+		self.cpi_df = None
 
-psid_data = PSIDData()
-psid_data.load()
-print(psid_data.get_household_wealth_data())
+	def load(self):
+		print("Loading OECD CPI data...")
+		df = pd.read_csv('data/OECD/USA-CPI-1980-2022.csv')
+		self.cpi_df = df[['TIME', 'Value']].copy()
+		self.loaded = True
+		print("OECD CPI data loaded")
+  
+
+	def get_cpi_data(self):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.")
+		return self.cpi_df.copy()
+
+# class ForbesData():
+# 	def __init__(self):
+# 		self.loaded = False
+		
+# 	def load(self):
+# 		pass
+
+# 	def get_inflation_data():
+# 		return self.inflation_df.copy()
+
+# fed_data = FedData()
+# fed_data.load()
+# print(fed_data.get_net_worth_data())
+
+# psid_data = PSIDData()
+# psid_data.load(cpi_adjust=True)
+# print(psid_data.get_household_wealth_data())

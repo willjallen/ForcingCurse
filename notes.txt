@@ -1,0 +1,27 @@
+https://www.federalreserve.gov/releases/z1/dataviz/dfa/distribute/chart/#range:1989.3,2023.2;quarter:135;series:Net%20worth;demographic:networth;population:all;units:levels
+The fed derives quarterly results by interpolating the consumer report data done every 3ish years
+
+https://dqydj.com/net-worth-percentiles/
+https://dqydj.com/millionaires-in-america/
+https://www.kaggle.com/datasets/prasertk/forbes-worlds-billionaires-list-2022
+
+Household wealth data
+https://simba.isr.umich.edu/DC/s.aspx
+WEALTH W/ 
+found from https://arxiv.org/pdf/1209.4787.pdf
+section 6.1
+
+
+CPI:
+OECD (2023), Inflation (CPI) (indicator). doi: 10.1787/eee82e6e-en (Accessed on 02 November 2023)
+
+Pareto:
+Simple Models of Pareto Income and Wealth Inequality
+https://assets.aeaweb.org/asset-server/articles-attachments/jep/app/2901/29010029_app.pdf 
+Pareto Models for Top Incomes
+https://hal.science/hal-02145024v1/file/TopIncomes.pdf
+The Kinetics of Wealth and the Origin of the Pareto Law
+https://arxiv.org/pdf/1212.6300.pdf
+
+
+TODO: Data for population levels over time
