@@ -39,7 +39,7 @@ sns.set_style("darkgrid")
 # Set global defaults for matplotlib
 plt.rcParams['savefig.dpi'] = 300  # set the DPI for saved figures
 
-# Use Seaborn's green color palette
+# Use Seaborn's blue color palette
 sns.set_palette(sns.dark_palette("#69d", reverse=False))  
  
  
@@ -91,7 +91,7 @@ save_fig(plt, 'net_worth_over_time_stacked.png')
 # Picking out a single period
 #================================================================
 
-chosen_period = '2020Q1'
+chosen_period = '2019Q1'
 net_worth_chosen_period_df = net_worth_df.loc[chosen_period]
 # print(net_worth_chosen_period_df)
 
