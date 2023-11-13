@@ -30,6 +30,21 @@ def save_fig(plt, name):
 	global plt_cnt
 	plt.savefig(f'{OUTPUT_DIRECTORY}/{plt_cnt}_{name}')
 	plt_cnt += 1
+
+#================================================================
+# Plot notator wrapper function
+#================================================================
+
+def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/projects/modeling-wealth", note=""):
+	# Adjust the bottom margin to make space for the note
+	plt.subplots_adjust(bottom=0.18)
+
+	extra_note = f"Note: {note}" if note else ""
+
+	# Add the data source and website URL to the plot
+	note_text = f"Data Source: {data_source} \n More info: {website}\n{extra_note}"
+	plt.text(0.95, 0.04, note_text, 
+			 ha='right', va='center', transform=plt.gcf().transFigure, fontsize=9, alpha=0.7)
  
 #================================================================
 # Graph Styling
@@ -73,7 +88,7 @@ plt.figure(figsize=(14, 8))
 plt.hist(psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'], bins=200, histtype='stepfilled', alpha=0.8)
 
 # Title and labels
-plt.title(f'{chosen_period} - Household Net Worth Histogram')
+plt.title(f'{chosen_period} - Household Net Worth Histogram, 200 bins')
 plt.ylabel('Frequency')
 plt.xlabel('Net Worth')
 
@@ -90,6 +105,9 @@ plt.xticks(locs, [f"${x*1e-6:.1f}M" for x in locs])  # Set new labels in million
 # Plot properties
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt)
 
 # Save
 save_fig(plt, 'net_worth_per_household_hist.png')
@@ -118,7 +136,7 @@ plt.xticks(transformed_nice_numbers, [f"${x:,.0f}" for x in nice_numbers])
 
 
 # Title and labels
-plt.title(f'{chosen_period} - Household Net Worth symlog Histogram')
+plt.title(f'{chosen_period} - symlog Household Net Worth Histogram, 200 bins')
 plt.ylabel('Frequency')
 plt.xlabel('Net Worth')
 
@@ -137,8 +155,11 @@ plt.xticks(rotation=45)
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
-save_fig(plt, 'net_worth_per_household_hist.png')
+save_fig(plt, 'symlog_net_worth_per_household_hist.png')
 
 #================================================================
 # Net Worth histogram, 200 bins, clamped range [-200_000, 2_000_000]
@@ -148,7 +169,7 @@ arr = psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY']
 m = -200_000
 n = 2_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
-# print(f'{inclusion_ratio}%')
+print(f'net_worth_per_household_clamped_hist inclusion ratio: {inclusion_ratio}%')
 
 
 # Set up figure
@@ -158,7 +179,7 @@ plt.figure(figsize=(14, 8))
 plt.hist(psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'], bins=200, range=(-200_000, 2_000_000), histtype='stepfilled', alpha=0.8)
 
 # Title and labels
-plt.title(f'{chosen_period} - Household Net Worth Clamped Histogram')
+plt.title(f'{chosen_period} - Household Net Worth Histogram, 200 bins')
 plt.ylabel('Frequency')
 plt.xlabel('Net Worth')
 
@@ -175,6 +196,9 @@ plt.xlim(-200_000, 2_000_000)
 # Plot properties
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt, note="data clamped to range [200,000, 2,000,000]")
 
 # Save
 save_fig(plt, 'net_worth_per_household_clamped_hist.png')
@@ -201,7 +225,7 @@ arr = psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY']
 m = 1
 n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
-print(f'{inclusion_ratio}%')
+print(f'net_worth_per_household_cdf_plot.png inclusion ratio: {inclusion_ratio}%')
 
 # Filter the values we want
 filtered_arr = arr[(arr > m) & (arr <= n)]
@@ -219,7 +243,7 @@ plt.figure(figsize=(14, 8))
 plt.plot(sorted_data, cdf_values, marker='.', linestyle='none', markersize=5, label='Empirical CDF')
 
 # Title and labels
-plt.title(f'{chosen_period} - Empirical CDF of Net Worth')
+plt.title(f'{chosen_period} - Empirical CDF of Household Net Worth')
 plt.ylabel('CDF (Proportion less than x)')
 plt.xlabel('Net Worth')
 
@@ -234,6 +258,9 @@ plt.xticks(locs, [f"${x*1e-6:.1f}M" for x in locs])  # Set new labels in million
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt, note="data clamped to range [1, 100,000,000]")
+
 # Save
 save_fig(plt, 'net_worth_per_household_cdf_plot.png')
 
@@ -244,7 +271,7 @@ arr = psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY']
 m = 1
 n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
-print(f'{inclusion_ratio}%')
+print(f'net_worth_per_household_log_log_cdf_plot inclusion ratio: {inclusion_ratio}%')
 
 # Filter the values we want
 filtered_arr = arr[(arr > m) & (arr <= n)]
@@ -262,7 +289,7 @@ plt.figure(figsize=(14, 8))
 plt.plot(sorted_data, cdf_values, marker='.', linestyle='none', markersize=5, label='Empirical CDF')
 
 # Title and labels
-plt.title(f'{chosen_period} - Empirical CDF of Net Worth')
+plt.title(f'{chosen_period} - Empirical CDF of log Household Net Worth')
 plt.ylabel('CDF (Proportion less than x)')
 plt.xlabel('Net Worth')
 
@@ -279,6 +306,9 @@ plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(currency_formatter))
 # Plot properties
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt, note="data clamped to range [1, 100,000,000]")
 
 # Save
 save_fig(plt, 'net_worth_per_household_log_log_cdf_plot.png')
@@ -308,7 +338,7 @@ plt.figure(figsize=(14, 8))
 plt.plot(sorted_data, cdf_values, marker='.', linestyle='none', markersize=5, label='Empirical CDF')
 
 # Title and labels
-plt.title(f'{chosen_period} - Empirical CDF of Household Net Worth Clamped')
+plt.title(f'{chosen_period} - Empirical log CDF of log Household Net Worth')
 plt.ylabel('CDF (Proportion less than x)')
 plt.xlabel('Net Worth')
 
@@ -325,6 +355,9 @@ plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(currency_formatter))
 # Plot properties
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt, note="data clamped to range [1,000, 100,000,000]")
 
 # Save
 save_fig(plt, 'net_worth_per_household_clamped_log_log_cdf_plot.png')
@@ -441,7 +474,7 @@ for i, ((slope, intercept), r2, weighted_r2, start_value) in enumerate(sorted_li
 
 	
 # Title and labels
-plt.title(f'{chosen_period} - Empirical CDF of Household Net Worth Clamped')
+plt.title(f'{chosen_period} - Empirical log CDF of log Household Net Worth with Linear Fits')
 plt.ylabel('CDF (Proportion less than x)')
 plt.xlabel('Net Worth')
 
@@ -459,16 +492,19 @@ plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.legend()
 plt.tight_layout()
 
+# Notate
+notate_plot(plt, note="data clamped to range [1, 100,000,000]")
+
 # Save
 save_fig(plt, 'net_worth_per_household_clamped_log_log_cdf_weighted_lin_fit_plot.png')
 
 
 #================================================================
-# Net Worth histogram, 200 bins, clamped range (0, 1_000_000_000]
+# Net Worth histogram, 200 bins, clamped range (1, 1_000_000_000]
 #================================================================
 arr = psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
 m = 1
-n = 10_000_000
+n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
 print(f'{inclusion_ratio}%')
 
@@ -492,7 +528,7 @@ first_bin_upper_limit = m + bin_width
 print(first_bin_upper_limit)
 
 # Filter the data to get the tail (>= first bin)
-tail_data = np.sort(filtered_arr[filtered_arr >= first_bin_upper_limit])
+tail_data = np.sort(filtered_arr[filtered_arr >= 1])
 
 
 # Estimate parameters for the Pareto distribution using MLE
@@ -511,7 +547,7 @@ count, bins, _ = plt.hist(filtered_arr, bins=num_bins, range=(m, n), log=True, h
 plt.plot(x_grid, pareto_pdf_mle * len(tail_data) * np.diff(bins)[0], label='Pareto fit (MLE)', color='orange')
 
 # Title and labels
-plt.title(f'{chosen_period} - Household Net Worth Clamped >0 Histogram')
+plt.title(f'{chosen_period}' + r' - Household Net Worth Pareto PDF fit, $\alpha =$' +f'{shape:,.2f}'+ r', $x_m =$' + f'{scale:,.2f}, {num_bins} bins')
 plt.ylabel('Frequency')
 plt.xlabel('Net Worth')
 
@@ -527,15 +563,18 @@ plt.xlim(m, n)
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt, note="data clamped to range [1, 100,000,000]")
+
 # Save
 save_fig(plt, 'net_worth_per_household_clamped_hist_pareto_pdf.png')
 
 #================================================================
-# Pareto CDF, clamped range (0, 1_000_000_000]
+# Pareto CDF, clamped range (0, 1_00_000_000]
 #================================================================
 arr = psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
 m = 1
-n = 10_000_000
+n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
 print(f'{inclusion_ratio}%')
 
@@ -559,7 +598,7 @@ first_bin_upper_limit = m + bin_width
 print(first_bin_upper_limit)
 
 # Filter the data to get the tail (>= first bin)
-tail_data = np.sort(filtered_arr[filtered_arr >= first_bin_upper_limit])
+tail_data = np.sort(filtered_arr[filtered_arr >= 1])
 
 
 # Estimate parameters for the Pareto distribution using MLE
@@ -576,7 +615,7 @@ plt.figure(figsize=(14, 8))
 plt.plot(percentiles*100, pareto_ppf, color='orange')
 
 # Title and labels
-plt.title(f'{chosen_period} - Household Net Worth Pareto CDF')
+plt.title(f'{chosen_period}' + r' - Misleading Household Net Worth Pareto CDF by Percentile, $\alpha =$' +f'{shape:,.2f}'+ r', $x_m =$' + f'{scale:,.2f}')
 plt.ylabel('Net Worth')
 plt.xlabel('Percentile')
 
@@ -592,8 +631,11 @@ plt.xticks(np.arange(0, 101, 10))
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt, note="data clamped to range [1, 100,000,000]")
+
 # Save
-save_fig(plt, 'net_worth_per_household_clamped_hist_pareto_pdf.png')
+save_fig(plt, 'net_worth_per_household_clamped_hist_pareto_cdf.png')
 #================================================================
 # Comparing with FED percentile data
 #================================================================
@@ -619,7 +661,7 @@ normalized_wealth = net_worth_chosen_period_df / pd.Series(people_in_category)
 #================================================================
 arr = psid_household_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
 m = 1
-n = 10_000_000
+n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
 print(f'{inclusion_ratio}%')
 
@@ -643,7 +685,7 @@ first_bin_upper_limit = m + bin_width
 print(first_bin_upper_limit)
 
 # Filter the data to get the tail (>= first bin)
-tail_data = np.sort(filtered_arr[filtered_arr >= first_bin_upper_limit])
+tail_data = np.sort(filtered_arr[filtered_arr >= 1])
 
 
 # Estimate parameters for the Pareto distribution using MLE
@@ -659,27 +701,25 @@ plt.figure(figsize=(14, 8))
 print(normalized_wealth)
 
 # Generate the colors for each set of plots
-left_colors = sns.color_palette("flare", n_colors=5)
-mid_colors = sns.color_palette("crest", n_colors=5)
-right_colors = sns.color_palette("viridis", n_colors=5)
+# left_colors = sns.color_palette("flare", n_colors=5)
+# mid_colors = sns.color_palette("crest", n_colors=5)
+colors = sns.color_palette("viridis", n_colors=5)
 
 # Now loop through and plot each category with its respective colors
 for i, (category, (start, end)) in enumerate(fed_data.PERCENTILES.items()):
-	plt.plot(start, normalized_wealth[category], marker='o', label=f'{fed_data.PERCENTILES_STR[category]} Left', color=left_colors[i])
+	plt.plot(start, normalized_wealth[category], marker='o', label=f'{fed_data.PERCENTILES_STR[category]} Left', color=colors[i])
 
 for i, (category, (start, end)) in enumerate(fed_data.PERCENTILES.items()):
-	plt.plot(start + (end-start)/2, normalized_wealth[category], marker='o', label=f'{fed_data.PERCENTILES_STR[category]} Mid', color=mid_colors[i])
+	plt.plot(start + (end-start)/2, normalized_wealth[category], marker='o', label=f'{fed_data.PERCENTILES_STR[category]} Mid', color=colors[i])
  
 for i, (category, (start, end)) in enumerate(fed_data.PERCENTILES.items()):
-	plt.plot(end, normalized_wealth[category], marker='o', label=f'{fed_data.PERCENTILES_STR[category]} Right', color=right_colors[i])
+	plt.plot(end, normalized_wealth[category], marker='o', label=f'{fed_data.PERCENTILES_STR[category]} Right', color=colors[i])
 
-
- 
 # Plot
 plt.plot(percentiles*100, pareto_ppf, color='orange')
 
 # Title and labels
-plt.title(f'{chosen_period} - Household Net Worth Pareto CDF')
+plt.title(f'{chosen_period}' + r' - Misleading Household Net Worth Pareto CDF by Percentile; Fed Comparison, $\alpha =$' +f'{shape:,.2f}'+ r', $x_m =$' + f'{scale:,.2f}')
 plt.ylabel('Net Worth')
 plt.xlabel('Percentile')
 
@@ -710,8 +750,11 @@ plt.legend(handles, labels)
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt, data_source="simba.isr.umich.edu\nfederalreserve.gov", note="data clamped to range [1, 100,000,000]")
+
 # Save
-save_fig(plt, 'net_worth_per_household_clamped_hist_pareto_pdf.png')
+save_fig(plt, 'net_worth_per_household_clamped_hist_pareto_cdf_comparison.png')
 
 
 #================================================================
@@ -757,6 +800,9 @@ plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(currency_formatter))
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
 save_fig(plt, 'net_worth_per_household_log_log_cdf_plot.png')
 
@@ -796,6 +842,9 @@ plt.xticks(rotation=45)
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
 save_fig(plt, 'net_worth_per_household_scatter.png')
 
@@ -825,6 +874,9 @@ plt.xticks(rotation=45)
 # Plot properties
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt)
 
 # Save
 save_fig(plt, 'log_net_worth_per_household_scatter.png')
@@ -857,6 +909,9 @@ plt.xscale('log')
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
 save_fig(plt, 'log_log_net_worth_per_household_scatter.png')
 
@@ -886,6 +941,9 @@ plt.xticks(rotation=45)
 # Plot properties
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt)
 
 # Save
 save_fig(plt, 'symlog_net_worth_per_household_scatter.png')
@@ -918,6 +976,9 @@ plt.xscale('log')
 # Plot properties
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt)
 
 # Save
 save_fig(plt, 'log_symlog_net_worth_per_household_scatter.png')

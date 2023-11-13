@@ -60,16 +60,13 @@ class FedData():
 	def load(self):
 		print("Loading FED net worth data...")
 		self.df = pd.read_csv("data/FED/dfa-networth-levels.csv")
+
 		# Adjust the date format and convert to datetime
 		self.df['Date'] = self.df['Date'].str.replace(':', '-').astype('period[Q]')
 
 		# Pivot the dataframe
 		self.df_net_worth = self.df.pivot(index='Date', columns='Category', values='Net worth')
   
-		# Reverse the order of the columns
-		# new_order = ['TopPt1', 'RemainingTop1', 'Next9', 'Next40', 'Bottom50']
-		# self.df_net_worth = self.df_net_worth.reindex(columns=new_order)
- 
 		# Renormalize units to single dollars
 		self.df_net_worth *= 1_000_000 
 

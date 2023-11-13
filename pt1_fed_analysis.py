@@ -29,6 +29,23 @@ def save_fig(plt, name):
 	plt.savefig(f'{OUTPUT_DIRECTORY}/{plt_cnt}_{name}')
 	plt_cnt += 1
  
+
+#================================================================
+# Plot notator wrapper function
+#================================================================
+
+def notate_plot(plt: plt, data_source="federalreserve.gov", website="wallen.me/projects/modeling-wealth", note=""):
+	# Adjust the bottom margin to make space for the note
+	plt.subplots_adjust(bottom=0.18)
+
+	extra_note = f"Note: {note}" if note else ""
+
+	# Add the data source and website URL to the plot
+	note_text = f"Data Source: {data_source} \n More info: {website}\n{extra_note}"
+	plt.text(0.95, 0.04, note_text, 
+			 ha='right', va='center', transform=plt.gcf().transFigure, fontsize=9, alpha=0.7)
+
+
 #================================================================
 # Graph Styling
 #================================================================
@@ -84,6 +101,9 @@ plt.yticks(locs, [f"{x*1e-12:.1f}T" for x in locs])  # Set new labels in trillio
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
 save_fig(plt, 'net_worth_over_time_stacked.png')
 
@@ -122,6 +142,9 @@ plt.xticks(rotation=45)
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
 save_fig(plt, 'net_worth_dist_bar.png')
 
@@ -133,7 +156,8 @@ save_fig(plt, 'net_worth_dist_bar.png')
 TOTAL_POPULATION = 333_287_557
 
 # Calculate the number of people in each category
-people_in_category = {category: TOTAL_POPULATION * size for category, size in fed_data.POPULATION_SIZES.items()}
+people_in_category = {category: TOTAL_POPULATION * size for 
+					  category, size in fed_data.POPULATION_SIZES.items()}
 
 # Normalize the wealth by number of people in each category
 normalized_wealth = net_worth_chosen_period_df / pd.Series(people_in_category)
@@ -164,6 +188,9 @@ plt.xticks(rotation=45)
 # Plot properties
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt)
 
 # Save
 save_fig(plt, 'net_worth_per_capita_bar.png')
@@ -200,10 +227,11 @@ for i, category in enumerate(fed_data.POPULATION_SIZES.keys()):
 
 
 # Adjust the bottom margin to make space for the note
-plt.subplots_adjust(bottom=0.2)
+# plt.subplots_adjust(bottom=0.2)
 # Add note about exaggeration
-plt.text(0.5, 0.02, 'Note: the linewidth of 99.99-100 percentile is exaggerated by 5x compared to the original width', 
-         ha='center', va='center', transform=plt.gcf().transFigure)
+plt.figtext(.68, .8, "linewidth of 99.99-100 percentile is exaggerated by 5x")
+# plt.text(0.5, 0.02, 'Note: the linewidth of 99.99-100 percentile is exaggerated by 5x compared to the original width', 
+		#  ha='center', va='center', transform=plt.gcf().transFigure)
 
 
 # Title and labels
@@ -227,6 +255,9 @@ plt.xticks(rotation=45)
 # Plot properties
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
+
+# Notate
+notate_plot(plt)
 
 # Save
 save_fig(plt, 'scaled_net_worth_per_capita_bar.png')
@@ -263,8 +294,11 @@ plt.xticks(rotation=45)
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
-save_fig(plt, 'log_net_worth_per_capita_line+bar.png')
+save_fig(plt, 'log_net_worth_per_capita_bar.png')
 
 #================================================================
 # Scaled Per capita log wealth by percentile category (bar graphs)
@@ -297,10 +331,11 @@ for i, category in enumerate(fed_data.POPULATION_SIZES.keys()):
 		plt.bar(x=bars_left[i], height=normalized_wealth[category], width=bars_width[i], label=category, align='edge')
 
 # Adjust the bottom margin to make space for the note
-plt.subplots_adjust(bottom=0.2)
-# Add note about exaggeration
-plt.text(0.5, 0.02, 'Note: the linewidth of 99.99-100 percentile is exaggerated by 5x compared to the original width', 
-         ha='center', va='center', transform=plt.gcf().transFigure)
+# plt.subplots_adjust(bottom=0.2)
+# # Add note about exaggeration
+plt.figtext(.68, .8, "linewidth of 99.99-100 percentile is exaggerated by 5x")
+# plt.text(0.5, 0.02, 'Note: the linewidth of 99.99-100 percentile is exaggerated by 5x compared to the original width', 
+# 		 ha='center', va='center', transform=plt.gcf().transFigure)
 
 # Title and labels
 plt.title(f'{chosen_period} - log Net Worth Per capita by Population Percentile with Proportional Scaling')
@@ -328,9 +363,15 @@ plt.xticks(rotation=45)
 plt.grid(True, axis='y', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 
+# Notate
+notate_plot(plt)
+
 # Save
 save_fig(plt, 'scaled_log_net_worth_per_capita_bar.png')
 
+#================================================================
+# Animation: Scaled Per capita log wealth by percentile category (bar graphs) 
+#================================================================
 
 #================================================================
 # Interpolated Per capita wealth by percentile (bar graphs)
@@ -341,7 +382,7 @@ values_df = pd.DataFrame({'values': normalized_wealth.values})
 
 # Calculate the percentiles
 # weibull for heavy-tailed distribution
-normalized_wealth_percentiles = calculate_percentiles(values_df, 'values', 1, interpolation='linear')
+normalized_wealth_percentiles = calculate_percentiles(values_df, 'values', 0.01, interpolation='linear')
 
 # Increase number of colors
 sns.set_palette(sns.dark_palette("#69d", n_colors=101, reverse=False))
