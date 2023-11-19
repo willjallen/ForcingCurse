@@ -83,7 +83,7 @@ class PSIDData():
 	def __init__(self):
 		self.loaded = False
   
-	def load(self, cpi_adjust: bool, target_year=2022):
+	def load(self, cpi_adjust: bool, equivalence_scale_adjust: bool, target_year=2022):
 		print("Loading PSID household wealth data...")
   
   
@@ -100,9 +100,6 @@ class PSIDData():
 				str(year): cpi_target_year / cpi_value
 				for year, cpi_value in zip(cpi_data['TIME'], cpi_data['Value'])
 			}
-   
- 
- 
 
 		# Load the data labels
 		with open("data/PSID/data_labels.txt", 'r') as file:
@@ -129,13 +126,14 @@ class PSIDData():
 			index_column = next((col for col in columns_for_year if 'INTERVIEW' in self.variables_dict[col]), None)
 			imp_wealth_column = next((col for col in columns_for_year if 'IMP WEALTH' in self.variables_dict[col]), None)
 			acc_wealth_column = next((col for col in columns_for_year if 'ACC WEALTH' in self.variables_dict[col]), None)
+			num_family_unit_column = next((col for col in columns_for_year if '# IN FU' in self.variables_dict[col]), None) 
 
 			# Create a dataframe with the relevant columns
-			if index_column and imp_wealth_column and acc_wealth_column:
-				year_df = self.household_wealth_data_df[[index_column, imp_wealth_column, acc_wealth_column]].copy()
+			if index_column and imp_wealth_column and acc_wealth_column and num_family_unit_column:
+				year_df = self.household_wealth_data_df[[index_column, imp_wealth_column, acc_wealth_column, num_family_unit_column]].copy()
 				year_df.set_index(index_column, inplace=True)
 				year_df.index.name = 'FAMILY ID'
-				year_df.columns = ['IMP WEALTH W/ EQUITY', 'ACC WEALTH W/ EQUITY']
+				year_df.columns = ['IMP WEALTH W/ EQUITY', 'ACC WEALTH W/ EQUITY', '# IN FU']
 	
 				# Remove empty rows (NaN)
 				year_df = year_df.dropna(axis=0, how='any')	
@@ -144,8 +142,19 @@ class PSIDData():
 				if cpi_adjust:
 					multiplier = self.cpi_multiplier_dict[year]
 					year_df['IMP WEALTH W/ EQUITY'] *= multiplier
-	
+				'''
+				A. B. Atkinson, L. Rainwater, T. M. Smeeding, Income Distribution in OECD Countries: Evidence
+				from Luxembourg Income Study, Organization for Economic Co-operation and Development, Paris,
+				1995. 
+				''' 
+				# Net household wealth is divided by the square root of the number of household members
+				if equivalence_scale_adjust:
+					year_df['IMP WEALTH W/ EQUITY'] /= np.sqrt(year_df['# IN FU'])
+     
 				self.household_wealth_year_dfs[year] = year_df
+
+			else:
+				print("Error: missing column", index_column, imp_wealth_column, acc_wealth_column, num_family_unit_column)
 
 		self.loaded = True
 		print("PSID household wealth data loaded")
@@ -155,10 +164,6 @@ class PSIDData():
 			raise Exception("Data not loaded. Call the 'load' method first.") 
 		return copy.deepcopy(self.household_wealth_year_dfs)
 
-		# sample_year = next(iter(self.household_wealth_year_dfs))  # Get a sample year
-		# print(self.household_wealth_year_dfs[sample_year].head())  # Display the dataframe for this year 
-		
-  
 	# Function to parse the labels and convert it to a dictionary
 	def parse_to_dict(self, lines):
 		variable_dict = {}
@@ -215,6 +220,6 @@ class OECDData():
 # fed_data.load()
 # print(fed_data.get_net_worth_data())
 
-# psid_data = PSIDData()
-# psid_data.load(cpi_adjust=True)
-# print(psid_data.get_household_wealth_data())
+psid_data = PSIDData()
+psid_data.load(cpi_adjust=True, equivalence_scale_adjust=True)
+print(psid_data.get_household_wealth_data())

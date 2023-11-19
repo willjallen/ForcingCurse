@@ -1,0 +1,4 @@
+labels.txt was manually modified:
+- Consistent dating (89 -> 1989)
+- Removed unused labels (prior to 1984)
+- Added dates to # IN FU labels

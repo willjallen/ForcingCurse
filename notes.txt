@@ -12,6 +12,13 @@ found from https://arxiv.org/pdf/1209.4787.pdf
 section 6.1
 "Panel Study of Income Dynamics, public use dataset [restricted use data, if appropriate]. Produced and distributed by the Institute for Social Research, University of Michigan, Ann Arbor, MI (year data were downloaded)";
 
+Citation: Panel Study of Income Dynamics, public use dataset [restricted use data, if appropriate]. Produced and distributed by the Survey Research Center, Institute for Social Research, University of Michigan, Ann Arbor, MI (year data were downloaded).
+
+Acknowledgement: The collection of data used in this study was partly supported by the National Institutes of Health under grant number R01 HD069609 and R01 AG040213, and the National Science Foundation under award numbers SES 1157698 and 1623684.
+
+equivalence scale (household normalization to person)
+https://www.oecd.org/els/soc/Income-distribution-in-OECD-countries-1995-SPS18.pdf
+
 CPI:
 OECD (2023), Inflation (CPI) (indicator). doi: 10.1787/eee82e6e-en (Accessed on 02 November 2023)
 

@@ -1,58 +1,141 @@
 ****** PSID DATA CENTER ************************* 
-****** Variable labels for JobID = 325874 ******* 
+****** Variable labels for JobID = 326503 ******* 
 
 Variable    Labels
-
+                                
+V10001     RELEASE NUMBER                          
 V10002     1984 INTERVIEW NUMBER                   
+V10418     # IN FU 1984                                
+S116       IMP WEALTH W/O EQUITY (WEALTH1) 1984      
+S116A      ACC WEALTH W/O EQUITY (WEALTH1) 1984      
 S117       IMP WEALTH W/ EQUITY (WEALTH2) 1984       
 S117A      ACC WEALTH W/ EQUITY (WEALTH2) 1984       
+V11101     RELEASE NUMBER                          
+V11102     1985 INTERVIEW NUMBER                   
+V11605     # IN FU 1985                                 
+V12501     RELEASE NUMBER                          
+V12502     1986 INTERVIEW NUMBER                   
+V13010     # IN FU 1986                                 
+V13701     RELEASE NUMBER                          
+V13702     1987 INTERVIEW NUMBER                   
+V14113     # IN FU 1987                                 
+V14801     RELEASE NUMBER                          
+V14802     1988 INTERVIEW NUMBER                   
+V15129     # IN FU 1988                                
+V16301     RELEASE NUMBER                          
 V16302     1989 INTERVIEW NUMBER                   
+V16630     # IN FU 1989                                
+S216       IMP WEALTH W/O EQUITY (WEALTH1) 1989      
+S216A      ACC WEALTH W/O EQUITY (WEALTH1) 1989      
 S217       IMP WEALTH W/ EQUITY (WEALTH2) 1989       
 S217A      ACC WEALTH W/ EQUITY (WEALTH2) 1989       
+V17701     RELEASE NUMBER                          
+V17702     1990 INTERVEW NUMBER                    
+V18048     # IN FU 1990                                 
+V19001     RELEASE NUMBER                          
+V19002     1991 INTERVIEW NUMBER                   
+V19348     # IN FU 1991                                
+V20301     RELEASE NUMBER                          
+V20302     1992 INTERVIEW NUMBER                   
+V20650     # IN FU 1992                                
+ER2001     RELEASE NUMBER                          
 ER2002     1994 INTERVIEW #                        
+ER2006     # IN FU 1994                                
+S316       IMP WEALTH W/O EQUITY (WEALTH1) 1994      
+S316A      ACC WEALTH W/O EQUITY (WEALTH1) 1994      
 S317       IMP WEALTH W/ EQUITY (WEALTH2) 1994       
 S317A      ACC WEALTH W/ EQUITY (WEALTH2) 1994       
+ER5001     RELEASE NUMBER                          
+ER5002     1995 INTERVIEW #                        
+ER5005     # IN FU 1995                                 
+ER7001     RELEASE NUMBER                          
+ER7002     1996 INTERVIEW #                        
+ER7005     # IN FU 1996                                
+ER10001    RELEASE NUMBER                          
+ER10002    1997 INTERVIEW #                        
+ER10008    # IN FU 1997                                
+ER13001    RELEASE NUMBER                          
 ER13002    1999 FAMILY INTERVIEW (ID) NUMBER       
+ER13009    # IN FU 1999                                
+S416       IMP WEALTH W/O EQUITY (WEALTH1) 1999      
+S416A      ACC WEALTH W/O EQUITY (WEALTH1) 1999      
 S417       IMP WEALTH W/ EQUITY (WEALTH2) 1999       
 S417A      ACC WEALTH W/ EQUITY (WEALTH2) 1999       
+ER17001    RELEASE NUMBER                          
 ER17002    2001 FAMILY INTERVIEW (ID) NUMBER       
+ER17012    # IN FU 2001                                
+S516       IMP WEALTH W/O EQUITY (WEALTH1) 2001      
+S516A      ACC WEALTH W/O EQUITY (WEALTH1) 2001      
 S517       IMP WEALTH W/ EQUITY (WEALTH2) 2001       
 S517A      ACC WEALTH W/ EQUITY (WEALTH2) 2001       
+ER21001    RELEASE NUMBER                          
 ER21002    2003 FAMILY INTERVIEW (ID) NUMBER       
+ER21016    # IN FU 2003                                 
+S616       IMP WEALTH W/O EQUITY (WEALTH1) 2003      
+S616A      ACC WEALTH W/O EQUITY (WEALTH1) 2003      
 S617       IMP WEALTH W/ EQUITY (WEALTH2) 2003       
 S617A      ACC WEALTH W/ EQUITY (WEALTH2) 2003       
+ER25001    RELEASE NUMBER                          
 ER25002    2005 FAMILY INTERVIEW (ID) NUMBER       
+ER25016    # IN FU 2005                                
+S716       IMP WEALTH W/O EQUITY (WEALTH1) 2005      
+S716A      ACC WEALTH W/O EQUITY (WEALTH1) 2005      
 S717       IMP WEALTH W/ EQUITY (WEALTH2) 2005       
 S717A      ACC WEALTH W/ EQUITY (WEALTH2) 2005       
+ER36001    RELEASE NUMBER                          
 ER36002    2007 FAMILY INTERVIEW (ID) NUMBER       
+ER36016    # IN FU 2007                                
+S816       IMP WEALTH W/O EQUITY (WEALTH1) 2007      
+S816A      ACC WEALTH W/O EQUITY (WEALTH1) 2007      
 S817       IMP WEALTH W/ EQUITY (WEALTH2) 2007       
 S817A      ACC WEALTH W/ EQUITY (WEALTH2) 2007       
 ER42001    RELEASE NUMBER                          
 ER42002    2009 FAMILY INTERVIEW (ID) NUMBER       
+ER42016    # IN FU 2009                                 
+ER46968    IMP WEALTH W/O EQUITY (WEALTH1) 2009      
+ER46969    ACC WEALTH W/O EQUITY (WEALTH1) 2009      
 ER46970    IMP WEALTH W/ EQUITY (WEALTH2) 2009       
 ER46971    ACC WEALTH W/ EQUITY (WEALTH2) 2009       
 ER47301    RELEASE NUMBER                          
 ER47302    2011 FAMILY INTERVIEW (ID) NUMBER       
+ER47316    # IN FU 2011                                 
+ER52392    IMP WEALTH W/O EQUITY (WEALTH1) 2011      
+ER52393    ACC WEALTH W/O EQUITY (WEALTH1) 2011      
 ER52394    IMP WEALTH W/ EQUITY (WEALTH2) 2011       
 ER52395    ACC WEALTH W/ EQUITY (WEALTH2) 2011       
 ER53001    RELEASE NUMBER                          
 ER53002    2013 FAMILY INTERVIEW (ID) NUMBER       
+ER53016    # IN FU 2013                                 
+ER58209    IMP WEALTH W/O EQUITY (WEALTH1) 2013    
+ER58210    ACC WEALTH W/O EQUITY (WEALTH1) 2013    
 ER58211    IMP WEALTH W/ EQUITY (WEALTH2) 2013     
 ER58212    ACC WEALTH W/ EQUITY (WEALTH2) 2013     
 ER60001    RELEASE NUMBER                          
 ER60002    2015 FAMILY INTERVIEW (ID) NUMBER       
+ER60016    # IN FU 2015                                 
+ER65406    IMP WEALTH W/O EQUITY (WEALTH1) 2015    
+ER65407    ACC WEALTH W/O EQUITY (WEALTH1) 2015    
 ER65408    IMP WEALTH W/ EQUITY (WEALTH2) 2015     
 ER65409    ACC WEALTH W/ EQUITY (WEALTH2) 2015     
 ER66001    RELEASE NUMBER                          
 ER66002    2017 FAMILY INTERVIEW (ID) NUMBER       
+ER66016    # IN FU 2017                                
+ER71483    IMP WEALTH W/O EQUITY (WEALTH1) 2017    
+ER71484    ACC WEALTH W/O EQUITY (WEALTH1) 2017    
 ER71485    IMP WEALTH W/ EQUITY (WEALTH2) 2017     
 ER71486    ACC WEALTH W/ EQUITY (WEALTH2) 2017     
 ER72001    RELEASE NUMBER                          
 ER72002    2019 FAMILY INTERVIEW (ID) NUMBER       
+ER72016    # IN FU 2019                                
+ER77509    IMP WEALTH W/O EQUITY (WEALTH1) 2019    
+ER77510    ACC WEALTH W/O EQUITY (WEALTH1) 2019    
 ER77511    IMP WEALTH W/ EQUITY (WEALTH2) 2019     
 ER77512    ACC WEALTH W/ EQUITY (WEALTH2) 2019     
 ER78001    RELEASE NUMBER                          
 ER78002    2021 FAMILY INTERVIEW (ID) NUMBER       
+ER78016    # IN FU 2021                                 
+ER81836    IMP WEALTH W/O EQUITY (WEALTH1) 2021    
+ER81837    ACC WEALTH W/O EQUITY (WEALTH1) 2021    
 ER81838    IMP WEALTH W/ EQUITY (WEALTH2) 2021     
 ER81839    ACC WEALTH W/ EQUITY (WEALTH2) 2021     
 
