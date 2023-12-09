@@ -220,6 +220,4 @@ class OECDData():
 # fed_data.load()
 # print(fed_data.get_net_worth_data())
 
-psid_data = PSIDData()
-psid_data.load(cpi_adjust=True, equivalence_scale_adjust=True)
-print(psid_data.get_household_wealth_data())
+

@@ -80,13 +80,14 @@ HOUSEHOLD = not equivalence_scale_adjust
 # Picking out a single period
 #================================================================
 
-psid_wealth_chosen_period_df = psid_wealth_dict[PSID_CHOSEN_PERIOD]
+psid_chosen_period_df = psid_wealth_dict[PSID_CHOSEN_PERIOD]
+psid_wealth_chosen_period_df = psid_chosen_period_df['IMP WEALTH W/ EQUITY']
 
 #================================================================
 # Calculate percentiles
 #================================================================
 
-wealth_percentiles = calculate_percentiles(psid_wealth_chosen_period_df, 'IMP WEALTH W/ EQUITY', 0.01)
+wealth_percentiles = calculate_percentiles(psid_chosen_period_df, 'IMP WEALTH W/ EQUITY', 0.01)
 percentiles_df = pd.DataFrame(list(wealth_percentiles.items()), columns=['Percentile', 'Wealth'])
 
 #================================================================
@@ -210,7 +211,6 @@ sns.set_palette(sns.dark_palette("#2e8b57", reverse=True), n_colors=1)
 
 # First we will ignore all values <= 0
 
-
 '''
 Nature of the Data: Wealth distribution is often multimodal and not well-captured by simple distributions. 
 A Pareto distribution assumes that the log-log plot of the cumulative distribution is linear, which may not be 
@@ -221,7 +221,7 @@ the case for the entire range of data, particularly near the lower end.
 # Clamped >0 log-log Net Worth emperical CDF 
 #================================================================
 #region
-arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
+arr = psid_wealth_chosen_period_df 
 m = 1
 n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
@@ -243,7 +243,7 @@ plt.figure(figsize=(14, 8))
 plt.plot(sorted_data, cdf_values, marker='.', linestyle='none', markersize=5, label='Empirical CDF')
 
 # Title and labels
-plt.title(f'{PSID_CHOSEN_PERIOD} - {"Household" if HOUSEHOLD else "Individual"} Empirical log CDF of log Net Worth')
+plt.title(f'{PSID_CHOSEN_PERIOD} - {"Household" if HOUSEHOLD else "Individual"} Empirical CDF of Net Worth')
 plt.ylabel(r'Pr$(X \leq x)$')
 plt.xlabel('Net Worth')
 
@@ -283,7 +283,7 @@ def perform_linear_regression(x, y):
 def weighted_r_squared(r_squared, num_points, total_points):
 	return r_squared * (num_points / total_points)**(1/5)
 
-arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
+arr = psid_wealth_chosen_period_df 
 m = 1
 n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
@@ -415,7 +415,7 @@ save_fig(plt, 'net_worth_clamped_log_log_cdf_lin_fit_plot.png')
 #-------------------------------------
 # Extract Data
 #-------------------------------------
-arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
+arr = psid_wealth_chosen_period_df 
 m = 1
 n = 100_000_000
 # inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
@@ -454,7 +454,7 @@ plt.plot(sorted_data, emperical_cdf_values, marker='.', linestyle='none', marker
 plt.plot(sorted_data, pareto_cdf, label='Pareto CDF', color='orange')
 
 # Title and labels
-plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto CDF by Percentile,'+ r' $\alpha =$' +f'{shape:,.2f},'+ f' location = {location:,.2f}' + r', $x_m =$' + f'{scale:,.2f}')
+plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto CDF fit,'+ r' $\alpha =$' +f'{shape:,.2f},'+ f' location = {location:,.2f}' + r', $x_m =$' + f'{scale:,.2f}')
 plt.ylabel(r'Pr$(X \leq x)$')
 plt.xlabel('Net Worth')
 
@@ -482,7 +482,7 @@ save_fig(plt, 'net_worth_clamped_plot_pareto_cdf.png')
 # Pareto PDF, Net Worth histogram, 200 bins, clamped range (1, 1_000_000_000]
 #================================================================
 #region
-arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
+arr = psid_wealth_chosen_period_df 
 m = 1
 n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
@@ -527,7 +527,7 @@ count, bins, _ = plt.hist(filtered_arr, bins=num_bins, range=(m, n), log=True, h
 plt.plot(x_grid, pareto_pdf_mle * len(tail_data) * np.diff(bins)[0], label='Pareto fit (MLE)', color='orange')
 
 # Title and labels
-plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto PDF fit,'+ r' $\alpha =$' +f'{shape:,.2f},'+ f' location = {location:,.2f}' r', $x_m =$' + f'{scale:,.2f}, {num_bins} bins')
+plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto PDF fit,'+ r' $\alpha =$' +f'{shape:,.2f},'+ f' location = {location:,.2f}' + r', $x_m =$' + f'{scale:,.2f}')
 plt.ylabel('Frequency')
 plt.xlabel('Net Worth')
 
@@ -555,7 +555,7 @@ save_fig(plt, 'net_worth_clamped_hist_pareto_pdf.png')
 # Pareto PPF, clamped range [1, 1_00_000_000]
 #================================================================
 #region
-arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
+arr = psid_wealth_chosen_period_df 
 m = 1
 n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
@@ -598,7 +598,7 @@ plt.figure(figsize=(14, 8))
 plt.plot(percentiles*100, pareto_ppf, color='orange')
 
 # Title and labels
-plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto Percentiles,'+ r' $\alpha =$' +f'{shape:,.2f}'+ r', $x_m =$' + f'{scale:,.2f}')
+plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto Percentiles,'+ r' $\alpha =$' +f'{shape:,.2f},'+ f' location = {location:,.2f}' + r', $x_m =$' + f'{scale:,.2f}')
 plt.ylabel('Net Worth')
 plt.xlabel('Percentile')
 
@@ -618,7 +618,7 @@ plt.tight_layout()
 notate_plot(plt, note="data clamped to range [1, 100,000,000]")
 
 # Save
-save_fig(plt, 'net_worth_clamped_plot_pareto_percentiles.png')
+save_fig(plt, 'net_worth_clamped_plot_pareto_ppf.png')
 
 #endregion
 
@@ -648,7 +648,7 @@ normalized_wealth = net_worth_chosen_period_df / pd.Series(people_in_category)
 # Pareto PPF, clamped range (0, 1_000_000_000]
 #================================================================
 #region
-arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
+arr = psid_wealth_chosen_period_df 
 m = 1
 n = 100_000_000
 inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
@@ -708,7 +708,7 @@ for i, (category, (start, end)) in enumerate(fed_data.PERCENTILES.items()):
 plt.plot(percentiles*100, pareto_ppf, color='orange')
 
 # Title and labels
-plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto Percentiles; Fed Comparison,'+ r' $\alpha =$' +f'{shape:,.2f}'+ r', $x_m =$' + f'{scale:,.2f}')
+plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto Percentiles; Fed comparison,'+ r' $\alpha =$' +f'{shape:,.2f},'+ f' location = {location:,.2f}' + r', $x_m =$' + f'{scale:,.2f}')
 plt.ylabel('Net Worth')
 plt.xlabel('Percentile')
 
@@ -743,6 +743,6 @@ plt.tight_layout()
 notate_plot(plt, data_source="simba.isr.umich.edu\nfederalreserve.gov", note="data clamped to range [1, 100,000,000]")
 
 # Save
-save_fig(plt, 'net_worth_clamped_plot_pareto_percentiles_fed_comparison.png')
+save_fig(plt, 'net_worth_clamped_plot_pareto_ppf_fed_comparison.png')
 
 #endregion

@@ -32,3 +32,13 @@ https://arxiv.org/pdf/1212.6300.pdf
 
 
 TODO: Data for population levels over time
+
+https://en.wikipedia.org/wiki/Burr_distribution
+
+Dagum:
+https://en.wikipedia.org/wiki/Dagum_distribution
+https://edoc.unibas.ch/61230/1/20180305141821_5a9d439d76be5.pdf
+https://www.researchgate.net/publication/227377674_Wealth_distribution_models_analisys_and_applications/link/57c5a2a008ae7642019b0c6a/download
+
+Simulation
+https://www.sciencedirect.com/science/article/pii/S0167268122000580
