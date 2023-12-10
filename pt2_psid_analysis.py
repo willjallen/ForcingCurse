@@ -1,3 +1,5 @@
+# %%
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,10 +10,12 @@ import shutil
 from data import FedData, PSIDData
 from utils.helper import calculate_percentiles
 from constants import PSID_CHOSEN_PERIOD
+
+# %%
 #================================================================
 # Output Directory Setup
 #================================================================
-
+#region
 OUTPUT_DIRECTORY = 'out/pt2'
 
 if os.path.exists(OUTPUT_DIRECTORY):
@@ -25,11 +29,12 @@ def save_fig(plt, name):
 	global plt_cnt
 	plt.savefig(f'{OUTPUT_DIRECTORY}/{plt_cnt}_{name}')
 	plt_cnt += 1
-
+#endregion
+# %%
 #================================================================
 # Plot notator wrapper function
 #================================================================
-
+#region
 def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/projects/modeling-wealth", note=""):
 	# Adjust the bottom margin to make space for the note
 	plt.subplots_adjust(bottom=0.18)
@@ -41,10 +46,12 @@ def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/
 	plt.text(0.95, 0.04, note_text, 
 			 ha='right', va='center', transform=plt.gcf().transFigure, fontsize=9, alpha=0.7)
  
+#endregion
+# %%
 #================================================================
 # Graph Styling
 #================================================================
-
+#region
 # Set the Seaborn style
 sns.set_style("darkgrid")
 
@@ -54,10 +61,12 @@ plt.rcParams['savefig.dpi'] = 300  # set the DPI for saved figures
 # Use Seaborn's green color palette
 sns.set_palette(sns.dark_palette("#2e8b57", reverse=True), n_colors=1)  
  
+#endregion
+# %%
 #================================================================
 # Importing Data
 #================================================================
-
+#region
 psid_data = PSIDData()
 # Equivalence scale adjusts net worth to individuals
 equivalence_scale_adjust = False
@@ -66,22 +75,28 @@ psid_wealth_dict = psid_data.get_household_wealth_data()
 
 HOUSEHOLD = not equivalence_scale_adjust
 
+#endregion
+# %%
 #================================================================
 # Picking out a single period
 #================================================================
-
+#region
 psid_wealth_chosen_period_df = psid_wealth_dict[PSID_CHOSEN_PERIOD]
 
+#endregion
+# %%
 #================================================================
 # Calculate percentiles
 #================================================================
-
+#region
 wealth_percentiles = calculate_percentiles(psid_wealth_chosen_period_df, 'IMP WEALTH W/ EQUITY', 0.01)
 percentiles_df = pd.DataFrame(list(wealth_percentiles.items()), columns=['Percentile', 'Wealth'])
-
+#endregion
+# %%
 #================================================================
 # Net Worth Histogram, 200 bins
 #================================================================
+#region
 # Set up figure
 plt.figure(figsize=(14, 8))
 
@@ -111,10 +126,13 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'net_worth_hist.png')
-
+#endregion
+# %%
 #================================================================
 # Net Worth histogram, 200 bins, clamped range [-200_000, 2_000_000]
 #================================================================
+#region
+
 # Include 99% of samples in our clamped histogram
 arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
 m = -200_000
@@ -153,10 +171,13 @@ notate_plot(plt, note="data clamped to range [-200,000, 2,000,000]")
 
 # Save
 save_fig(plt, 'net_worth_clamped_hist.png')
-
+#endregion
+# %%
 #================================================================
 # Net Worth histogram, 200 bins, symlog
 #================================================================
+#region
+
 def symlog1p(x):
 	return np.sign(x) * np.log1p(np.abs(x))
 
@@ -194,10 +215,13 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'symlog_net_worth_hist.png')
-
+#endregion
+# %%
 #================================================================
 # log-log Net Worth CDF 
 #================================================================
+#region
+
 arr = psid_wealth_chosen_period_df['IMP WEALTH W/ EQUITY'] 
 m = -100_000_000
 n = 100_000_000
@@ -243,10 +267,13 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'net_worth_log_log_cdf_plot.png')
-
+#endregion
+# %%
 #================================================================
 # symlog net worth by percentile (scatter)
 #================================================================
+#region
+
 # Set up figure
 plt.figure(figsize=(14, 8))
 
@@ -278,3 +305,5 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'symlog_net_worth_percentile_plot.png')
+#endregion
+# %%

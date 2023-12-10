@@ -1,3 +1,5 @@
+# %%
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,10 +16,11 @@ from data import FedData, PSIDData
 from utils.helper import calculate_percentiles
 from constants import PSID_CHOSEN_PERIOD
 
+#%%
 #================================================================
 # Output Directory Setup
 #================================================================
-
+#region
 OUTPUT_DIRECTORY = 'out/pt3'
 
 if os.path.exists(OUTPUT_DIRECTORY):
@@ -31,11 +34,13 @@ def save_fig(plt, name):
 	global plt_cnt
 	plt.savefig(f'{OUTPUT_DIRECTORY}/{plt_cnt}_{name}')
 	plt_cnt += 1
+#endregion
 
+#%%
 #================================================================
 # Plot notator wrapper function
 #================================================================
-
+#region
 def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/projects/modeling-wealth", note=""):
 	# Adjust the bottom margin to make space for the note
 	plt.subplots_adjust(bottom=0.18)
@@ -47,11 +52,13 @@ def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/
 	plt.text(0.95, 0.04, note_text, 
 			 ha='right', va='center', transform=plt.gcf().transFigure, fontsize=9, alpha=0.7)
  
- 
+#endregion
+
+# %%
 #================================================================
 # Graph Styling
 #================================================================
-
+#region
 # Set the Seaborn style
 sns.set_style("darkgrid")
 
@@ -61,12 +68,13 @@ plt.rcParams['savefig.dpi'] = 300  # set the DPI for saved figures
 # Use Seaborn's blue color palette
 sns.set_palette(sns.dark_palette("#69d", reverse=False))  
 
- 
- 
+#endregion
+
+# %%
 #================================================================
 # Importing Data
 #================================================================
-
+#region
 psid_data = PSIDData()
 # Equivalence scale adjusts net worth to individuals
 equivalence_scale_adjust = False
@@ -75,21 +83,27 @@ psid_wealth_dict = psid_data.get_household_wealth_data()
 
 
 HOUSEHOLD = not equivalence_scale_adjust
+#endregion
 
+# %%
 #================================================================
 # Picking out a single period
 #================================================================
-
+#region
 psid_chosen_period_df = psid_wealth_dict[PSID_CHOSEN_PERIOD]
 psid_wealth_chosen_period_df = psid_chosen_period_df['IMP WEALTH W/ EQUITY']
+#endregion
 
+# %%
 #================================================================
 # Calculate percentiles
 #================================================================
-
+#region
 wealth_percentiles = calculate_percentiles(psid_chosen_period_df, 'IMP WEALTH W/ EQUITY', 0.01)
 percentiles_df = pd.DataFrame(list(wealth_percentiles.items()), columns=['Percentile', 'Wealth'])
+#endregion
 
+# %%
 #================================================================
 # Pareto CDF
 #================================================================
@@ -133,6 +147,7 @@ save_fig(plt, 'pareto_cdf.png')
 
 #endregion
 
+# %%
 #================================================================
 # Pareto PDF
 #================================================================
@@ -192,9 +207,11 @@ save_fig(plt, 'pareto_pdf.png')
 
 #endregion
 
+# %%
 #================================================================
 # Graph Styling
 #================================================================
+#region
 
 # Set the Seaborn style
 sns.set_style("darkgrid")
@@ -204,11 +221,13 @@ plt.rcParams['savefig.dpi'] = 300  # set the DPI for saved figures
 
 # Use Seaborn's green color palette
 sns.set_palette(sns.dark_palette("#2e8b57", reverse=True), n_colors=1) 
+#endregion
+# %%
 
 #================================================================
 # Pareto/Distribution fitting
 #================================================================
-
+#region
 # First we will ignore all values <= 0
 
 '''
@@ -216,7 +235,9 @@ Nature of the Data: Wealth distribution is often multimodal and not well-capture
 A Pareto distribution assumes that the log-log plot of the cumulative distribution is linear, which may not be 
 the case for the entire range of data, particularly near the lower end.
 '''
+#endregion
 
+# %%
 #================================================================
 # Clamped >0 log-log Net Worth emperical CDF 
 #================================================================
@@ -269,6 +290,7 @@ save_fig(plt, 'net_worth_clamped_log_log_cdf_plot.png')
 
 #endregion
 
+# %%
 #================================================================
 # log-log Net Worth emperical CDF, clamped range [1, 1_000_000_000], linear regressions
 #================================================================
@@ -407,6 +429,7 @@ save_fig(plt, 'net_worth_clamped_log_log_cdf_lin_fit_plot.png')
 
 #endregion
 
+# %%
 #================================================================
 # Pareto CDF, clamped range [1, 1_00_000_000]
 #================================================================
@@ -478,6 +501,7 @@ save_fig(plt, 'net_worth_clamped_plot_pareto_cdf.png')
 
 #endregion
 
+# %%
 #================================================================
 # Pareto PDF, Net Worth histogram, 200 bins, clamped range (1, 1_000_000_000]
 #================================================================
@@ -551,6 +575,7 @@ save_fig(plt, 'net_worth_clamped_hist_pareto_pdf.png')
 
 #endregion
 
+# %%
 #================================================================
 # Pareto PPF, clamped range [1, 1_00_000_000]
 #================================================================
@@ -622,6 +647,7 @@ save_fig(plt, 'net_worth_clamped_plot_pareto_ppf.png')
 
 #endregion
 
+# %%
 #================================================================
 # Comparing with FED percentile data
 #================================================================

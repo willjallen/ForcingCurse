@@ -1,3 +1,4 @@
+# %%
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,10 +13,11 @@ from data import FedData, PSIDData
 from utils.helper import calculate_percentiles
 import math
 
+# %%
 #================================================================
 # Output Directory Setup
 #================================================================
-
+#region
 OUTPUT_DIRECTORY = 'out/pt1'
 
 if os.path.exists(OUTPUT_DIRECTORY):
@@ -29,12 +31,14 @@ def save_fig(plt, name):
 	global plt_cnt
 	plt.savefig(f'{OUTPUT_DIRECTORY}/{plt_cnt}_{name}')
 	plt_cnt += 1
- 
 
+#endregion
+
+# %%
 #================================================================
 # Plot notator wrapper function
 #================================================================
-
+#region
 def notate_plot(plt: plt, data_source="federalreserve.gov", website="wallen.me/projects/modeling-wealth", note="", margin=0.18):
 	# Adjust the bottom margin to make space for the note
 	plt.subplots_adjust(bottom=margin)
@@ -46,11 +50,13 @@ def notate_plot(plt: plt, data_source="federalreserve.gov", website="wallen.me/p
 	plt.text(0.95, 0.04, note_text, 
 			 ha='right', va='center', transform=plt.gcf().transFigure, fontsize=9, alpha=0.7)
 
+#endregion
 
+# %%
 #================================================================
 # Graph Styling
 #================================================================
-
+#region
 # Set the Seaborn style
 sns.set_style("darkgrid")
 
@@ -59,21 +65,24 @@ plt.rcParams['savefig.dpi'] = 300  # set the DPI for saved figures
 
 # Use Seaborn's blue color palette
 sns.set_palette(sns.dark_palette("#69d", reverse=False))  
- 
- 
+
+#endregion 
+
+# %%
 #================================================================
 # Importing Data
 #================================================================
-
+#region
 fed_data = FedData()
 fed_data.load()
 net_worth_df = fed_data.get_net_worth_data()
+#endregion
 
+# %%
 #================================================================
 # Net worth by coarse percentiles over time (stacked graph)
 #================================================================
-
-# Plotting the data
+#region
 
 # Make a copy
 net_worth_df_copy = net_worth_df.copy()
@@ -107,19 +116,22 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'net_worth_over_time_stacked.png')
+#endregion
 
+# %%
 #================================================================
 # Picking out a single period
 #================================================================
-
+#region
 chosen_period = '2019Q1'
 net_worth_chosen_period_df = net_worth_df.loc[chosen_period]
-# print(net_worth_chosen_period_df)
+#endregion
 
+# %%
 #================================================================
 # Net Worth by percentile category (bar graphs)
 #================================================================
-
+#region
 # Set up figure
 plt.figure(figsize=(14, 8))
 
@@ -148,11 +160,13 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'net_worth_dist_bar.png')
+#endregion
 
+# %%
 #================================================================
 # Calculate normalized (Per capita) wealth
 #================================================================
-
+#region
 # Define the total population
 TOTAL_POPULATION = 333_287_557
 
@@ -162,10 +176,13 @@ people_in_category = {category: TOTAL_POPULATION * size for
 
 # Normalize the wealth by number of people in each category
 normalized_wealth = net_worth_chosen_period_df / pd.Series(people_in_category)
+#endregion
 
+# %%
 #================================================================
 # Per capita wealth by percentile category (bar graphs)
 #================================================================
+#region
 
 # Set up figure
 plt.figure(figsize=(14, 8))
@@ -195,10 +212,13 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'net_worth_per_capita_bar.png')
+#endregion
 
+# %%
 #================================================================
 # Scaled Per capita wealth by percentile category (bar graphs)
 #================================================================
+#region
 
 # Initialize the starting point for the first bar
 left = 0
@@ -263,10 +283,14 @@ notate_plot(plt)
 # Save
 save_fig(plt, 'scaled_net_worth_per_capita_bar.png')
 
+#endregion
 
+# %%
 #================================================================
 # Per capita log wealth by percentile category (bar graphs)
 #================================================================
+#region
+
 # Set up figure
 plt.figure(figsize=(14, 8))
 
@@ -300,10 +324,13 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'log_net_worth_per_capita_bar.png')
+#endregion
 
+# %%
 #================================================================
 # Scaled Per capita log wealth by percentile category (bar graphs)
 #================================================================
+#region
 
 # Initialize the starting point for the first bar
 left = 0
@@ -369,10 +396,14 @@ notate_plot(plt)
 
 # Save
 save_fig(plt, 'scaled_log_net_worth_per_capita_bar.png')
+#endregion
 
+# %%
 #================================================================
 # Animation: Scaled Per capita log wealth by percentile category (bar graphs) 
 #================================================================
+#region
+
 people_in_category = {category: TOTAL_POPULATION * size for category, size in fed_data.POPULATION_SIZES.items()}
 
 def update(frame, ax1, ax2, ax3, ax4):
@@ -539,3 +570,5 @@ print('Rendering animation...')
 anim = animation.FuncAnimation(fig, update, fargs=(ax1, ax2, ax3, ax4), frames=frames, interval=100)
 anim.save('out/pt1/net_worth_animation.mp4', writer='ffmpeg')
 print('Animation finished rendering.')
+#endregion
+# %%

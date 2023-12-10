@@ -1,3 +1,4 @@
+#%%
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,10 +15,11 @@ from data import FedData, PSIDData
 from utils.helper import calculate_percentiles
 from constants import PSID_CHOSEN_PERIOD
 
+#%%
 #================================================================
 # Output Directory Setup
 #================================================================
-
+#region
 OUTPUT_DIRECTORY = 'out/pt4'
 
 if os.path.exists(OUTPUT_DIRECTORY):
@@ -31,11 +33,12 @@ def save_fig(plt, name):
 	global plt_cnt
 	plt.savefig(f'{OUTPUT_DIRECTORY}/{plt_cnt}_{name}')
 	plt_cnt += 1
-
+#endregion
+#%%
 #================================================================
 # Plot notator wrapper function
 #================================================================
-
+#region
 def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/projects/modeling-wealth", note=""):
 	# Adjust the bottom margin to make space for the note
 	plt.subplots_adjust(bottom=0.18)
@@ -47,11 +50,12 @@ def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/
 	plt.text(0.95, 0.04, note_text, 
 			 ha='right', va='center', transform=plt.gcf().transFigure, fontsize=9, alpha=0.7)
  
- 
+#endregion
+#%%
 #================================================================
 # Graph Styling
 #================================================================
-
+#region
 # Set the Seaborn style
 sns.set_style("darkgrid")
 
@@ -60,13 +64,11 @@ plt.rcParams['savefig.dpi'] = 300  # set the DPI for saved figures
 
 # Use Seaborn's blue color palette
 sns.set_palette(sns.dark_palette("#69d", reverse=False))  
-
- 
- 
+#endregion
 #================================================================
 # Importing Data
 #================================================================
-
+#region
 psid_data = PSIDData()
 # Equivalence scale adjusts net worth to individuals
 equivalence_scale_adjust = False
@@ -75,30 +77,28 @@ psid_wealth_dict = psid_data.get_household_wealth_data()
 
 
 HOUSEHOLD = not equivalence_scale_adjust
-
+#endregion
+#%%
 #================================================================
 # Picking out a single period
 #================================================================
-
+#region
 psid_chosen_period_df: pd.DataFrame = psid_wealth_dict[PSID_CHOSEN_PERIOD]
 psid_wealth_chosen_period_df: pd.Series = psid_chosen_period_df['IMP WEALTH W/ EQUITY']
-
+#endregion
+#%%
 #================================================================
 # Scale wealth values to normalize negative values to positive
 #================================================================
-
-# print(psid_wealth_chosen_period_df)
+#region
 
 min_value = np.min(psid_wealth_chosen_period_df)
 
-# print(psid_wealth_chosen_period_df[psid_wealth_chosen_period_df < 0])
-
 adjusted_psid_wealth_chosen_period_df = psid_wealth_chosen_period_df.apply(lambda x: (x + -min_value + 1) if x < 0 else x)
 
-# print(adjusted_psid_wealth_chosen_period_df[adjusted_psid_wealth_chosen_period_df < 0])
 
-
-
+#endregion
+#%%
 #================================================================
 # Clamped >0 log-log Net Worth emperical CDF 
 #================================================================
