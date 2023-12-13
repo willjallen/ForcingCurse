@@ -1,0 +1,2 @@
+https://www.kaggle.com/datasets/mdhamani/goodreads-books-100k
+Data was cleaned to only include "pages" column

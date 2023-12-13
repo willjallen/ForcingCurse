@@ -133,7 +133,7 @@ class PSIDData():
 				# Net household wealth is divided by the square root of the number of household members
 				if equivalence_scale_adjust:
 					year_df['IMP WEALTH W/ EQUITY'] /= np.sqrt(year_df['# IN FU'])
-     
+	 
 				self.household_wealth_year_dfs[year] = year_df
 
 			else:
@@ -188,6 +188,130 @@ class OECDData():
 		if not self.loaded:
 			raise Exception("Data not loaded. Call the 'load' method first.")
 		return self.cpi_df.copy()
+
+class CitiesData():
+	def __init__(self):
+		self.loaded = False
+	
+	def load(self):
+		print("Loading cities data...")
+		self.df_cities = pd.read_csv("data/CITIES/worldcities.csv")
+
+		self.loaded = True
+		print("Cities data loaded")
+	
+	def get_cities_data(self):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.") 
+		return self.df_cities.copy()
+
+class SmallBodiesData():
+	def __init__(self):
+		self.loaded = False
+	
+	def load(self):
+		print("Loading small bodies data...")
+		self.df_small_bodies = pd.read_csv("data/SMALL_BODIES/sbdb.csv")
+
+		self.loaded = True
+		print("Small bodies data loaded")
+	
+	def get_small_bodies_data(self):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.") 
+		return self.df_small_bodies.copy()
+
+
+
+class TreesData():
+	def __init__(self):
+		self.loaded = False
+		self.cleaned_file_path = "data/TREES/CLEANED_AL_TREE.csv"
+		self.original_file_path = "data/TREES/AL_TREE.csv"
+	def load(self):
+
+		try:
+			# First, try to load the cleaned data
+			print("Trying to load cleaned trees data...")
+			self.df_trees = pd.read_csv(self.cleaned_file_path)
+			print("Cleaned trees data loaded")
+		except FileNotFoundError:
+			# If the cleaned data is not found, load and clean the original data
+			print("Cleaned data not found, loading and cleaning original data...")
+			self.df_trees = pd.read_csv(self.original_file_path)
+			self.loaded = True
+			self.clean()
+			print("Original data cleaned. Try loading again.")
+			return
+		self.loaded = True
+
+
+
+	def clean(self, columns=["HT", "DIA"]):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.")
+		cleaned_data = self.df_trees[columns]
+		cleaned_data = cleaned_data.dropna(how='all')	
+		cleaned_data.to_csv(self.cleaned_file_path, index=False)
+		print("Data cleaned and saved as CLEANED_AL_TREE.csv")
+
+	
+	def get_trees_data(self):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.") 
+		return self.df_trees.copy()
+
+class BooksData():
+	def __init__(self):
+		self.loaded = False
+		self.cleaned_file_path = "data/BOOKS/CLEANED_GoodReads_100k_books.csv"
+		self.original_file_path = "data/BOOKS/GoodReads_100k_books.csv"
+
+	def load(self):
+
+		try:
+			# First, try to load the cleaned data
+			print("Trying to load cleaned books data...")
+			self.df_books = pd.read_csv(self.cleaned_file_path)
+			print("Cleaned books data loaded")
+		except FileNotFoundError:
+			# If the cleaned data is not found, load and clean the original data
+			print("Cleaned data not found, loading and cleaning original data...")
+			try:
+				self.df_books = pd.read_csv(self.original_file_path)
+			except FileNotFoundError:
+				raise Exception("Original data file not found. Please check the file path.")
+			except pd.errors.ParserError:
+				raise Exception("Error parsing the CSV file. Please check the file format.")
+
+			self.loaded = True
+			self.clean()
+			print("Original data cleaned. Try loading again.")
+			return
+
+		self.loaded = True
+
+	def clean(self, columns=["pages"]):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.")
+		# Select the specified columns
+		cleaned_data = self.df_books[columns]
+		cleaned_data = cleaned_data.dropna(how='all')	
+		# Save to a new CSV file
+		cleaned_data.to_csv(self.cleaned_file_path, index=False)
+		print("Data cleaned and saved as CLEANED_GoodReads_100k_books.csv")
+
+  
+	def get_books_data(self):
+		if not self.loaded:
+			raise Exception("Data not loaded. Call the 'load' method first.") 
+		return self.df_books.copy()
+
+
+# if __name__ == "__main__":
+#     cities_data = CitiesData()
+#     cities_data.load()
+
 
 # class ForbesData():
 # 	def __init__(self):

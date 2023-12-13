@@ -1,0 +1,3 @@
+https://apps.fs.usda.gov/fia/datamart/datamart.html
+2022 Alabama AL_TREE.csv
+Data was cleaned to only include HT "height" and DIA "diameter" columns
