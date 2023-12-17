@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.lines as mlines
+import matplotlib.animation as animation
 from scipy.stats import pareto
 from scipy.stats import linregress
 # from sklearn.neighbors import KernelDensity
@@ -13,11 +14,10 @@ import seaborn as sns
 import os
 import shutil
 from data import FedData, PSIDData
-from utils.helper import calculate_percentiles
+from utils.helper import calculate_percentiles, ssd
 from constants import PSID_CHOSEN_PERIOD
 
 #%%
-#================================================================
 # Output Directory Setup
 #================================================================
 #region
@@ -37,7 +37,6 @@ def save_fig(plt, name):
 #endregion
 
 #%%
-#================================================================
 # Plot notator wrapper function
 #================================================================
 #region
@@ -55,7 +54,6 @@ def notate_plot(plt: plt, data_source="simba.isr.umich.edu", website="wallen.me/
 #endregion
 
 # %%
-#================================================================
 # Graph Styling
 #================================================================
 #region
@@ -71,7 +69,6 @@ sns.set_palette(sns.dark_palette("#69d", reverse=False))
 #endregion
 
 # %%
-#================================================================
 # Importing Data
 #================================================================
 #region
@@ -86,7 +83,6 @@ HOUSEHOLD = not equivalence_scale_adjust
 #endregion
 
 # %%
-#================================================================
 # Picking out a single period
 #================================================================
 #region
@@ -95,7 +91,6 @@ psid_wealth_chosen_period_df = psid_chosen_period_df['IMP WEALTH W/ EQUITY']
 #endregion
 
 # %%
-#================================================================
 # Calculate percentiles
 #================================================================
 #region
@@ -104,7 +99,6 @@ percentiles_df = pd.DataFrame(list(wealth_percentiles.items()), columns=['Percen
 #endregion
 
 # %%
-#================================================================
 # Pareto CDF
 #================================================================
 #region
@@ -148,7 +142,6 @@ save_fig(plt, 'pareto_cdf.png')
 #endregion
 
 # %%
-#================================================================
 # Pareto PDF
 #================================================================
 #region
@@ -187,7 +180,7 @@ colors = iter(palette)
 
 # Plot the intersection points with corresponding colors
 for y in y_values:
-    plt.scatter(1, y, color=next(colors), s=50, zorder=10)
+	plt.scatter(1, y, color=next(colors), s=50, zorder=10)
 
 # Title and labels
 plt.title('Pareto Distribution PDF')
@@ -208,7 +201,6 @@ save_fig(plt, 'pareto_pdf.png')
 #endregion
 
 # %%
-#================================================================
 # Graph Styling
 #================================================================
 #region
@@ -224,7 +216,6 @@ sns.set_palette(sns.dark_palette("#2e8b57", reverse=True), n_colors=1)
 #endregion
 # %%
 
-#================================================================
 # Pareto/Distribution fitting
 #================================================================
 #region
@@ -238,7 +229,6 @@ the case for the entire range of data, particularly near the lower end.
 #endregion
 
 # %%
-#================================================================
 # Clamped >0 log-log Net Worth emperical CDF 
 #================================================================
 #region
@@ -291,7 +281,6 @@ save_fig(plt, 'net_worth_clamped_log_log_cdf_plot.png')
 #endregion
 
 # %%
-#================================================================
 # log-log Net Worth emperical CDF, clamped range [1, 1_000_000_000], linear regressions
 #================================================================
 #region
@@ -430,7 +419,6 @@ save_fig(plt, 'net_worth_clamped_log_log_cdf_lin_fit_plot.png')
 #endregion
 
 # %%
-#================================================================
 # Pareto CDF, clamped range [1, 1_00_000_000]
 #================================================================
 #region
@@ -452,8 +440,7 @@ sorted_data = np.sort(filtered_arr)
 #-------------------------------------
 
 # Estimate parameters for the Pareto distribution
-shape, location, scale = pareto.fit(sorted_data, 0.7, loc=1, scale=1)
-print("here")
+shape, location, scale = pareto.fit(sorted_data, floc=0, fscale=m)
 print(shape, location, scale)
 
 # Generate cdf
@@ -466,6 +453,8 @@ pareto_cdf = pareto.cdf(sorted_data, shape, loc=location, scale=scale)
 # Calculate the empirical CDF values
 emperical_cdf_values = np.arange(1, len(sorted_data)+1) / len(sorted_data)
 
+SSE = ssd(emperical_cdf_values, pareto_cdf)
+print('sse', ssd(emperical_cdf_values, pareto_cdf))
 
 # Set up figure
 plt.figure(figsize=(14, 8))
@@ -477,7 +466,7 @@ plt.plot(sorted_data, emperical_cdf_values, marker='.', linestyle='none', marker
 plt.plot(sorted_data, pareto_cdf, label='Pareto CDF', color='orange')
 
 # Title and labels
-plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - Misleading {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto CDF fit,'+ r' $\alpha =$' +f'{shape:,.2f},'+ f' location = {location:,.2f}' + r', $x_m =$' + f'{scale:,.2f}')
+plt.title(f'{PSID_CHOSEN_PERIOD}' + f' - {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto CDF fit,'+ r' $\alpha =$' +f'{shape:,.2f},'+ r', $x_m =$' + f'{scale:,.2f}' + f', SSE = {SSE:,.2f}')
 plt.ylabel(r'Pr$(X \leq x)$')
 plt.xlabel('Net Worth')
 
@@ -501,9 +490,156 @@ save_fig(plt, 'net_worth_clamped_plot_pareto_cdf.png')
 
 #endregion
 
+
 # %%
+# Animated Pareto CDF & SSE, clamped range [1, 1_00_000_000]
 #================================================================
-# Pareto PDF, Net Worth histogram, 200 bins, clamped range (1, 1_000_000_000]
+#region
+
+anim_fps = 60
+anim_length = 10
+n = 1
+m = 5_000_000
+
+# Logarithmic range
+log_n = np.log10(n)
+log_m = np.log10(m)
+
+# Number of frames in the animation
+num_frames = anim_fps * anim_length
+
+# Generate logarithmically spaced values
+log_m_values = np.linspace(log_n, log_m, num_frames)
+m_values = 10 ** log_m_values  # Convert back to actual values
+
+# Historical SSE Data
+sse_values = []
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 8))
+
+
+# m_values = np.arange(n, m + step, step) # 5 seconds @ 60 fps
+# m_values = np.arange(1, 1_000_000, 100_000) # 5 seconds @ 60 fps
+
+def update(frame):
+	print('frame: ', frame)
+	# Clear current axes
+	ax1.clear()
+	ax2.clear()
+
+	#-------------------------------------
+	# Extract Data
+	#-------------------------------------
+	arr = psid_wealth_chosen_period_df 
+	m = m_values[frame]
+	n = 100_000_000
+	# inclusion_ratio = np.sum((arr > m) & (arr < n)) / len(arr)
+	# print(f'{inclusion_ratio}%')
+
+	filtered_arr = arr[(arr >= m) & (arr <= n)]
+	sorted_data = np.sort(filtered_arr)
+
+	#-------------------------------------
+	# Pareto CDF
+	#-------------------------------------
+
+	# Estimate parameters for the Pareto distribution
+	shape, location, scale = pareto.fit(sorted_data, floc=0, fscale=m)
+	print(shape, location, scale)
+
+	# Generate cdf
+	pareto_cdf = pareto.cdf(sorted_data, shape, loc=0, scale=m)
+
+
+	#-------------------------------------
+	# Emperical CDF
+	#-------------------------------------
+
+	# Calculate the empirical CDF values
+	emperical_cdf_values = np.arange(1, len(sorted_data)+1) / len(sorted_data)
+
+	SSE = ssd(emperical_cdf_values, pareto_cdf)
+	print('sse', ssd(emperical_cdf_values, pareto_cdf))
+
+	# Set up figure
+	# plt.figure(figsize=(14, 8))
+
+	# Plot
+	ax1.plot(sorted_data, emperical_cdf_values, marker='.', linestyle='none', markersize=5, label='Empirical CDF')
+
+	# Plot
+	ax1.plot(sorted_data, pareto_cdf, label='Pareto CDF', color='orange')
+
+	# Title and labels
+	ax1.set_title(f'{PSID_CHOSEN_PERIOD}' + f' - {"Household" if HOUSEHOLD else "Individual"} Net Worth Pareto CDF fit,'+ r' $\alpha =$' +f'{shape:,.2f},'+ r', $x_m =$' + f'{scale:,.2f}' + f', SSE = {SSE:,.2f}')
+	ax1.set_ylabel(r'Pr$(X \leq x)$')
+	ax1.set_xlabel('Net Worth')
+
+	# y-axis
+	# ax1.yscale('log')
+
+	# x-axis
+	ax1.set_xscale('log')
+	xticks = ax1.get_xticks()
+	ax1.set_xticks(xticks)
+	ax1.set_xticklabels(xticks, rotation=45)
+	ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: "${:,.0f}".format(x)))
+	ax1.set_xlim(None,n) 
+ 
+
+
+	# # Plot properties
+	ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+	# # Update the SSE line graph
+	if SSE is not None:
+		sse_values.append(SSE)
+	print(len(m_values[:frame+1]), len(sse_values))
+	if len(m_values[:frame+1]) == len(sse_values):
+		ax2.plot(m_values[:frame+1], sse_values, label='SSE over time')
+		ax2.scatter(m_values[frame], SSE, color='red')  # current SSE
+
+	# Set titles, labels, etc for both ax1 and ax2
+	ax2.set_title('SSE vs $x_m$')
+	
+	ax2.set_xscale('log')
+	xticks = ax2.get_xticks()
+	ax2.set_xticks(xticks)
+	ax2.set_xticklabels(xticks, rotation=45)
+	ax2.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: "${:,.0f}".format(x)))
+	ax2.set_xlim(1,n) 
+ 
+ 
+	ax2.set_xlabel('$x_m$')
+	ax2.set_ylabel('SSE')
+	ax2.set_yscale('log')
+
+	plt.tight_layout()
+	notate_plot(plt, note="data clamped to range [1, 100,000,000]")
+
+	# Save
+	# save_fig(plt, 'net_worth_clamped_plot_pareto_cdf.png')
+
+
+print('Rendering animation...')
+# anim = animation.FuncAnimation(fig, update, frames=len(m_values), interval=1.6666)
+anim = animation.FuncAnimation(fig, update, frames=len(m_values), init_func=lambda: 1+1, interval=(1/anim_fps) * 1000)
+anim.save('out/pt3/pareto_cdf_animation.mp4', writer='ffmpeg')
+print('Animation finished rendering.')
+
+# For displaying in Jupyter Notebook, use:
+# from IPython.display import HTML
+# HTML(anim.to_html5_video())
+
+#endregion
+
+# %%
+# Net Worth Pareto Q-Q plot, clamped range [1, 1_000_000_000]
+#================================================================
+
+
+# %%
+# Pareto PDF, Net Worth histogram, 200 bins, clamped range [1, 1_000_000_000]
 #================================================================
 #region
 arr = psid_wealth_chosen_period_df 
@@ -576,7 +712,6 @@ save_fig(plt, 'net_worth_clamped_hist_pareto_pdf.png')
 #endregion
 
 # %%
-#================================================================
 # Pareto PPF, clamped range [1, 1_00_000_000]
 #================================================================
 #region
@@ -648,7 +783,6 @@ save_fig(plt, 'net_worth_clamped_plot_pareto_ppf.png')
 #endregion
 
 # %%
-#================================================================
 # Comparing with FED percentile data
 #================================================================
 #region
@@ -670,7 +804,7 @@ normalized_wealth = net_worth_chosen_period_df / pd.Series(people_in_category)
 
 #endregion
 
-#================================================================
+# %%
 # Pareto PPF, clamped range (0, 1_000_000_000]
 #================================================================
 #region
@@ -754,8 +888,8 @@ divider_line = mlines.Line2D([], [], color='black', linestyle='--')
 
 # Function to insert a divider
 def insert_divider(index):
-    handles.insert(index, divider_line)
-    labels.insert(index, '')  # An empty string for the label
+	handles.insert(index, divider_line)
+	labels.insert(index, '')  # An empty string for the label
 
 insert_divider(5)  
 insert_divider(11)

@@ -24,3 +24,7 @@ def calculate_percentiles(data, column_name, granularity, interpolation='linear'
         for p in np.arange(0, 100 + granularity, granularity)
     }
     return percentiles
+
+def ssd(A,B):
+    squares = (A - B) ** 2
+    return np.sum(squares)
